@@ -5,8 +5,9 @@ Python wrapper for Listrak v31 SOAP API
 
 Installation
 ------------
-Requirements: SOAPpy
-TODO: register with pip
+Requirements: requests, xmltodict
+
+TODO: register with PyPI
 
 Usage
 -----
@@ -26,7 +27,8 @@ Methods
 * get_lists()
 * get_saved_messages(list_id)
 * get_message_activity(list_id)
-
+* upload_contacts() # TODO
+* validate() # For user/pass and ip validation
 
 
 Version History
