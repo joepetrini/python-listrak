@@ -31,6 +31,7 @@ Methods
 
 Version History
 ---------------
+* 0.4 - Custom exception handling, user/pass validation, auto datetime conversion
 * 0.3 - New message methods, added param passing to SOAP request
 * 0.2 - SOAP requests working.  get_lists() added as first method
 * 0.1 - First commit

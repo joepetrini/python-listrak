@@ -1,4 +1,5 @@
 #import xml.etree.ElementTree as et
+import socket, re
 from datetime import datetime, timedelta
 import xmltodict
 import requests
@@ -38,13 +39,27 @@ class ListrakClient():
         else:
             data = data.replace('[BODY]', '<%s xmlns="http://webservices.listrak.com/v31/" />' % action)
 
+        print data
         response = requests.post(url, data=data, headers=headers)
         print response.text
+        if "[InvalidLogonAttempt]" in response.text:
+            raise InvalidLogonAttempt("Invalid user name or password")
+        if "[ProhibitedIPAddress]" in response.text:
+            raise InvalidLogonAttempt(
+                "IP address not allowed.  You need to add %s to your approved list." % socket.gethostbyname(socket.gethostname()))
+        print "response: %s %s" % (response.status_code, response.text)
         # Handle nil response with empty list
         #if '<WSException xsi:nil="true" />' in response.text: return [];
-        print response.text
+
         results = xmltodict.parse(response.text)
-        return results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action].items()[0][1]
+        ret = results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action].items()[0][1]
+        for i in ret:
+            for k,v in i.items():
+                if "Date" in k:
+                    v = re.sub()
+                    print "%s %s" % (k,v)
+                    i[k] = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
+        return ret
 
     def get_lists(self):
         r = self.do_action('GetContactListCollection')
@@ -60,4 +75,15 @@ class ListrakClient():
         
         data = {'ListID': list_id, 'StartDate':start, 'EndDate':end}
         r = self.do_action('ReportListMessageActivity', data)
-        return r        
+        return r
+
+    def upload_contacts(self):
+        #TODO
+        pass
+
+    def validate(self):
+        try:
+            self.get_lists()
+            return True
+        except Exception, e:
+            return e
