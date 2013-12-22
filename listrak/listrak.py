@@ -39,30 +39,41 @@ class ListrakClient():
         else:
             data = data.replace('[BODY]', '<%s xmlns="http://webservices.listrak.com/v31/" />' % action)
 
-        print data
         response = requests.post(url, data=data, headers=headers)
-        print response.text
+        #print response.text
         if "[InvalidLogonAttempt]" in response.text:
             raise InvalidLogonAttempt("Invalid user name or password")
+        if "[LoginAttemptsExceeded]" in response.text:
+            raise InvalidLogonAttempt("Login attempts exceeded")
         if "[ProhibitedIPAddress]" in response.text:
             raise InvalidLogonAttempt(
-                "IP address not allowed.  You need to add %s to your approved list." % socket.gethostbyname(socket.gethostname()))
-        print "response: %s %s" % (response.status_code, response.text)
+                "IP address not allowed.  You need to add %s to your approved list." % socket.gethostbyaddr("traklis.com")[2][0])
         # Handle nil response with empty list
         #if '<WSException xsi:nil="true" />' in response.text: return [];
 
         results = xmltodict.parse(response.text)
-        ret = results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action].items()[0][1]
+        try:
+            ret = results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action].items()[0][1]
+        except AttributeError:
+            # Single value response, no need to build a response list
+            return results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action]
+        except KeyError:
+            return []
         for i in ret:
             for k,v in i.items():
+                #if type(v) != "<type 'unicode'>":
+                #    i.pop(k, None)
                 if "Date" in k:
-                    v = re.sub()
-                    print "%s %s" % (k,v)
-                    i[k] = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
+                    #print v
+                    i[k] = datetime.strptime(re.sub('\.\d{1,3}','',v), "%Y-%m-%dT%H:%M:%S")
         return ret
 
     def get_lists(self):
         r = self.do_action('GetContactListCollection')
+        # Assign list size values
+        for l in r:
+            c = self.do_action('GetFilteredListCount', {'ListID': l['ListID']})
+            l['ListSize'] = c
         return r
 
     def get_saved_messages(self, list_id):
@@ -71,11 +82,30 @@ class ListrakClient():
 
     def get_message_activity(self, list_id, days=30):
         start = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
-        end = datetime.today().strftime("%Y-%m-%d")
+        end = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
         
         data = {'ListID': list_id, 'StartDate':start, 'EndDate':end}
         r = self.do_action('ReportListMessageActivity', data)
+        print r
         return r
+
+    def get_msg_opens(self, msg_id, page=1):
+        data = {'MsgID': msg_id, 'Page': page}
+        ret = self.do_action('ReportMessageContactOpen', data)
+        return ret
+
+    def get_msg_clicks(self, msg_id, page=1, days=30):
+        start = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        end = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")        
+
+        data = {'MsgID': msg_id, 'Page': page, 'StartDate':start, 'EndDate':end}
+        ret = self.do_action('ReportRangeMessageContactClick', data)
+        return ret
+
+    def get_msg_unsubs(self, msg_id, page=1):
+        data = {'MsgID': msg_id, 'Page': page}
+        ret = self.do_action('ReportMessageContactRemoval', data)
+        return ret
 
     def upload_contacts(self):
         #TODO

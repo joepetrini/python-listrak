@@ -27,12 +27,16 @@ Methods
 * get_lists()
 * get_saved_messages(list_id)
 * get_message_activity(list_id)
+* get_message_opens(msg_id)
+* get_msg_clicks(msg_id)
+* get_msg_unsubs(msg_id)
+* validate() # For user/pass and ip access validation
 * upload_contacts() # TODO
-* validate() # For user/pass and ip validation
 
 
 Version History
 ---------------
+* 0.5 - get_msg methods
 * 0.4 - Custom exception handling, user/pass validation, auto datetime conversion
 * 0.3 - New message methods, added param passing to SOAP request
 * 0.2 - SOAP requests working.  get_lists() added as first method
