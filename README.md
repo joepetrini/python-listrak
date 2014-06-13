@@ -31,11 +31,13 @@ Methods
 * get_msg_clicks(msg_id)
 * get_msg_unsubs(msg_id)
 * validate() # For user/pass and ip access validation
+* update_contact()
 * upload_contacts() # TODO
 
 
 Version History
 ---------------
+* 0.6 - get_list_attributes and update_contact methods added
 * 0.5 - get_msg methods
 * 0.4 - Custom exception handling, user/pass validation, auto datetime conversion
 * 0.3 - New message methods, added param passing to SOAP request

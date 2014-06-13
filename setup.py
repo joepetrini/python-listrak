@@ -14,9 +14,10 @@ setup(
     author='Joe Petrini',
     author_email='joepetrini@gmail.com',
     url='https://github.com/joepetrini/python-listrak',
-    download_url='https://github.com/joepetrini/python-listrak/archive/master.zip#egg=listrak-wrapper',
+    download_url='https://github.com/joepetrini/python-listrak/archive/v0.5.zip#egg=listrak-wrapper',
     license='MIT License',
     install_requires=['xmltodict','requests'],
-    py_modules=['listrak-wrapper'],
-    platforms=["any"]
+    py_modules=['listrak'],
+    platforms=['any'],
+    #packages=['listrak'],
 )
