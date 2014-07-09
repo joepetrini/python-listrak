@@ -1,5 +1,6 @@
 #import xml.etree.ElementTree as et
 from pprint import pprint
+from collections import OrderedDict
 import socket, re
 from datetime import datetime, timedelta
 import xmltodict
@@ -47,10 +48,11 @@ class ListrakClient():
             data = data.replace('[BODY]', '<%s xmlns="http://webservices.listrak.com/v31/" />' % action)
 
         if self.debug:
+            print data
             return data
 
         response = requests.post(url, data=data, headers=headers)
-
+        #print response.text.replace(">", ">\n")
         if "[InvalidLogonAttempt]" in response.text:
             raise InvalidLogonAttempt("Invalid user name or password")
         if "[LoginAttemptsExceeded]" in response.text:
@@ -69,6 +71,9 @@ class ListrakClient():
             return results['soap:Envelope']['soap:Body']['%sResponse'%action]['%sResult'%action]
         except KeyError:
             return []
+        # If single record returned, make it a list of 1 dict
+        if type(ret) == OrderedDict:
+            ret = [ret]
         for i in ret:
             for k,v in i.items():
                 #if type(v) != "<type 'unicode'>":
@@ -111,8 +116,25 @@ class ListrakClient():
         
         data = {'ListID': list_id, 'StartDate':start, 'EndDate':end}
         r = self.do_action('ReportListMessageActivity', data)
-        print r
         return r
+
+    def get_list_activity(self, list_id):
+        data = {'ListID': list_id, 'IncludeTerminated': '1'}
+        ret = self.do_action('ReportListConversationActivity', data)
+        return ret
+
+    def get_contact_activity(self, list_id, email, page=1):
+        data = {'ListID': list_id, 'EmailAddress': email, 'Page': page}
+        ret = self.do_action('ReportContactMessageActivity', data)
+        return ret
+
+    def get_msg_contact_activity(self, list_id, email, page=1):
+        data = {'ListID': list_id, 'EmailAddress': email, 'Page': page}
+        try:
+            ret = self.do_action('ReportMessageContactActivity', data)
+        except AttributeError:
+            ret = []
+        return ret
 
     def get_msg_opens(self, msg_id, page=1):
         data = {'MsgID': msg_id, 'Page': page}
@@ -130,6 +152,16 @@ class ListrakClient():
     def get_msg_unsubs(self, msg_id, page=1):
         data = {'MsgID': msg_id, 'Page': page}
         ret = self.do_action('ReportMessageContactRemoval', data)
+        return ret
+
+    def get_contacts_for_list(self, list_id, page=1):
+        data = {'ListID': list_id, 'Page': page}
+        ret = self.do_action('ReportSubscribedContacts', data)
+        return ret
+
+    def subscribe_contact(self, list_id, email, override_unsub=False):
+        data = {'ListID': list_id, 'ContactEmailAddress': email, 'OverrideUnsubscribe': int(override_unsub)}
+        ret = self.do_action('SubscribeContact', data)
         return ret
 
     def update_contact(self, list_id, email, attributes):
