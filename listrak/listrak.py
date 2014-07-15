@@ -128,8 +128,8 @@ class ListrakClient():
         ret = self.do_action('ReportContactMessageActivity', data)
         return ret
 
-    def get_msg_contact_activity(self, list_id, email, page=1):
-        data = {'ListID': list_id, 'EmailAddress': email, 'Page': page}
+    def get_msg_contact_activity(self, msg_id, page=1):
+        data = {'MsgID': msg_id, 'Page': page}
         try:
             ret = self.do_action('ReportMessageContactActivity', data)
         except AttributeError:

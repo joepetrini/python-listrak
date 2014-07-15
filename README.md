@@ -20,6 +20,14 @@ lists = client.get_lists()
 
 for l in lists:
     print "%s - %s" % (l['ListId'], l['ListName'])
+
+# Subscribe a contact
+list_id = lists[0]
+client.subscribe_contact(list_id, 'somenewemail@abc.com')
+
+# Update a segmentation attribute
+some_attr_id = client.get_list_attributes(list_id)['some_attr']['AttributeID']
+client.update_contact(list_id, 'somenewemail@abc.com', {some_attr_id: 'NEW VALUE'})
 ```
 
 Methods
