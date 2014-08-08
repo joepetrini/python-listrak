@@ -22,7 +22,7 @@ for l in lists:
     print "%s - %s" % (l['ListId'], l['ListName'])
 
 # Subscribe a contact
-list_id = lists[0]
+list_id = lists[0]['ListId']
 client.subscribe_contact(list_id, 'somenewemail@abc.com')
 
 # Update a segmentation attribute
@@ -48,6 +48,7 @@ Methods
 
 Version History
 ---------------
+* 0.8 - added externaleventid param to update_contact to allow events to trigger conducter
 * 0.7 - update_contact, get_list_attributes, subscribe_contact added.  Fixed bug in response when 1 item is returned
 * 0.6 - get_list_attributes and update_contact methods added
 * 0.5 - get_msg methods

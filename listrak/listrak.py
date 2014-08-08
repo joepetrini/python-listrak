@@ -49,10 +49,10 @@ class ListrakClient():
 
         if self.debug:
             print data
-            return data
+            #return data
 
         response = requests.post(url, data=data, headers=headers)
-        #print response.text.replace(">", ">\n")
+        print response.text.replace(">", ">\n")
         if "[InvalidLogonAttempt]" in response.text:
             raise InvalidLogonAttempt("Invalid user name or password")
         if "[LoginAttemptsExceeded]" in response.text:
@@ -101,9 +101,16 @@ class ListrakClient():
     def get_list_attributes(self, list_id):
         attrs = {}
         r = self.do_action('GetProfileHeaderCollection', {'ListID': list_id})
-        for rr in r[0]['WSProfileAttributes']:
-            d = dict(rr)
-            attrs[d['Name']] = d
+        for attr_set in r[1:]:
+            if 'Signup' in attr_set:
+                print attr_set
+                break
+            for rr in attr_set['WSProfileAttributes']:
+                try:
+                    d = dict(rr)
+                    attrs[d['Name']] = d
+                except ValueError:
+                    continue
         return attrs
 
     def get_saved_messages(self, list_id):
@@ -164,7 +171,7 @@ class ListrakClient():
         ret = self.do_action('SubscribeContact', data)
         return ret
 
-    def update_contact(self, list_id, email, attributes):
+    def update_contact(self, list_id, email, attributes, events=''):
         xml = '<EmailAddress>%s</EmailAddress><ListID>%s</ListID>' % (email, list_id)
         data = {}
         for k, v in attributes.items():
@@ -172,7 +179,7 @@ class ListrakClient():
             xml += '<Value>%s</Value></ContactProfileAttribute>' % v
         data['WSContact'] = xml
         data['ProfileUpdateType'] = 'Update'
-        data['ExternalEventIDs'] = ''
+        data['ExternalEventIDs'] = events
         data['OverrideUnsubscribe'] = 0
         ret = self.do_action('SetContact', data)
         return ret
