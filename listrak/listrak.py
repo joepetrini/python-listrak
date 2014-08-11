@@ -130,6 +130,16 @@ class ListrakClient():
         ret = self.do_action('ReportListConversationActivity', data)
         return ret
 
+    def get_conversations(self, list_id):
+        data = {'listID': list_id}
+        return self.do_action('ConductorGetConversations', data)
+
+    def get_conversation_activity(self, list_id, convo_id, page=1, days=90):
+        start = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        end = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")        
+        data = {'ConversationID': convo_id, 'Page': page, 'StartDate': start, 'EndDate': end}
+        return self.do_action('ReportConversationContactDelivery', data)
+
     def get_contact_activity(self, list_id, email, page=1):
         data = {'ListID': list_id, 'EmailAddress': email, 'Page': page}
         ret = self.do_action('ReportContactMessageActivity', data)

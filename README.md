@@ -32,6 +32,8 @@ client.update_contact(list_id, 'somenewemail@abc.com', {some_attr_id: 'NEW VALUE
 
 Methods
 -------
+* get_conversations(list_id)
+* get_conversation_activity(convo_id, page, days)
 * get_contact_activity(list_id, email, page)
 * get_lists()
 * get_list_attributes(list_id)
@@ -48,6 +50,7 @@ Methods
 
 Version History
 ---------------
+* 0.9 - added conversation related calls
 * 0.8 - added externaleventid param to update_contact to allow events to trigger conducter
 * 0.7 - update_contact, get_list_attributes, subscribe_contact added.  Fixed bug in response when 1 item is returned
 * 0.6 - get_list_attributes and update_contact methods added
